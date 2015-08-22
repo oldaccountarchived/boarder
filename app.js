@@ -95,3 +95,5 @@ function setupStatStream(containerInfo) {
 
     return deferred.promise;
 };
+
+listContainers().then(iterateContainers);
