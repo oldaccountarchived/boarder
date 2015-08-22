@@ -2,27 +2,14 @@ var dockerode = require('dockerode'),
     q = require('q'),
     url = require('url'),
     ws = require('ws'),
-    config;
-
-try {
-    config = require('./config');
-} catch(e) {
-    if (e.code == 'MODULE_NOT_FOUND')
-        config = { socketPath: '/var/run/docker.sock' };
-    else 
-        throw e;
-}
-
-console.log(config);
-    
-var docker = dockerode(config);
-var containerList = {};
+    config = require('./config'),
+    docker = dockerode(config),
+    containerList = {};
 
 function listContainers() {
     var deferred = q.defer();
 
     docker.listContainers(function(err, containers) {
-        console.log('CONT1', containers);
         if (err)
             deferred.reject(err);
         else
@@ -48,7 +35,6 @@ function cpuCalc(cpu_usage, prev_cpu_usage, system_usage, prev_system_usage, cor
 }
 
 function iterateContainers(containers) {
-    console.log('CONT2', containers);
     containers.forEach(function(containerInfo) {
         setupStatStream(containerInfo).then(
             function(stream) {
