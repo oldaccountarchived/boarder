@@ -1,9 +1,9 @@
 FROM node:latest
 
-ADD . /opt/dockerboard
+ADD . /opt/boarder
 
-WORKDIR /opt/dockerboard
+WORKDIR /opt/boarder
 
 RUN npm install
 
-CMD ["node app.js"]
+CMD ["node", "./app.js"]

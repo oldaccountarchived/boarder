@@ -5,19 +5,15 @@ var dockerode = require('dockerode'),
     config;
 
 try {
-    // Read Docker settings from config.json
     config = require('./config');
 } catch(e) {
-    if (e.code == 'MODULE_NOT_FOUND') {
-        // Set the config to use the default Docker socket path.
-        config = {
-            socketPath: '/var/run/docker.sock'
-        };
-    } else {
+    if (e.code == 'MODULE_NOT_FOUND')
+        config = { socketPath: '/var/run/docker.sock' };
+    else 
         throw e;
-    }
 }
-    
+
+console.log(config);
     
 var docker = dockerode(config);
 var containerList = {};
@@ -26,6 +22,7 @@ function listContainers() {
     var deferred = q.defer();
 
     docker.listContainers(function(err, containers) {
+        console.log('CONT1', containers);
         if (err)
             deferred.reject(err);
         else
@@ -51,14 +48,15 @@ function cpuCalc(cpu_usage, prev_cpu_usage, system_usage, prev_system_usage, cor
 }
 
 function iterateContainers(containers) {
+    console.log('CONT2', containers);
     containers.forEach(function(containerInfo) {
         setupStatStream(containerInfo).then(
             function(stream) {
                 var prev_cpu_usage = 0,
                     prev_system_usage = 0;
                 
-                stream.on('readable', function(stream) {
-                    var data = JSON.parse(stream.read().toString());
+                stream.on('data', function(data) {
+                    data = JSON.parse(data.toString());
                     var mem = data.memory_stats;
                     var cpu = data.cpu_stats;
                     var cpu_usage = cpu.cpu_usage.total_usage;
@@ -96,4 +94,6 @@ function setupStatStream(containerInfo) {
     return deferred.promise;
 };
 
-listContainers().then(iterateContainers);
+listContainers().then(iterateContainers).catch(function(err) {
+    console.log(err.stack);
+});;
