@@ -1,8 +1,24 @@
 var dockerode = require('dockerode'),
     q = require('q'),
-    url = require('url');
+    url = require('url'),
+    config;
 
-var docker = dockerode({socketPath: '/var/run/docker.sock'});
+try {
+    // Read Docker settings from config.json
+    config = require('./config');
+} catch(e) {
+    if (e.code == 'MODULE_NOT_FOUND') {
+        // Set the config to use the default Docker socket path.
+        config = {
+            socketPath: '/var/run/docker.sock'
+        };
+    } else {
+        throw e;
+    }
+}
+    
+    
+var docker = dockerode(config);
 var containerList = {};
 
 function listContainers() {
