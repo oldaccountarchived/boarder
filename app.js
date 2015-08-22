@@ -1,6 +1,7 @@
 var dockerode = require('dockerode'),
     q = require('q'),
     url = require('url'),
+    ws = require('ws'),
     config;
 
 try {
@@ -76,11 +77,6 @@ function iterateContainers(containers) {
                     prev_cpu_usage = cpu_usage;
                     prev_system_usage = system_usage;
                 });
-                
-                containerList[containerInfo.Id] = {
-                    info: containerInfo,
-                    stream: stream
-                };
             }
         );
     });
@@ -99,5 +95,3 @@ function setupStatStream(containerInfo) {
 
     return deferred.promise;
 };
-
-listContainers().then(iterateContainers);
