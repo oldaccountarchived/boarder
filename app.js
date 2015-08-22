@@ -8,7 +8,6 @@ var dockerode = require('dockerode'),
 
 function listContainers() {
     var deferred = q.defer();
-
     docker.listContainers(function(err, containers) {
         if (err)
             deferred.reject(err);
@@ -28,8 +27,8 @@ function memCalc(usage, limit) {
 }
 
 function cpuCalc(cpu_usage, prev_cpu_usage, system_usage, prev_system_usage, cores) {
-    var cpu_delta = cpu_usage - prev_cpu_usage;
-    var system_delta = system_usage - prev_system_usage;
+    var cpu_delta = cpu_usage - prev_cpu_usage,
+        system_delta = system_usage - prev_system_usage;
 
     return round(cpu_delta / system_delta * 100 * cores, 2);
 }
@@ -43,11 +42,11 @@ function iterateContainers(containers) {
                 
                 stream.on('data', function(data) {
                     data = JSON.parse(data.toString());
-                    var mem = data.memory_stats;
-                    var cpu = data.cpu_stats;
-                    var cpu_usage = cpu.cpu_usage.total_usage;
-                    var system_usage = cpu.system_cpu_usage;
-                    var cores = cpu.cpu_usage.percpu_usage.length;
+                    var mem = data.memory_stats,
+                        cpu = data.cpu_stats,
+                        cpu_usage = cpu.cpu_usage.total_usage,
+                        system_usage = cpu.system_cpu_usage,
+                        cores = cpu.cpu_usage.percpu_usage.length;
                     console.log(
                         containerInfo.Id,
                         memCalc(mem.usage, mem.limit),
@@ -69,7 +68,6 @@ function iterateContainers(containers) {
 function setupStatStream(containerInfo) {
     var deferred = q.defer(),
         container = docker.getContainer(containerInfo.Id);
-    
     container.stats(function(err, stream) {
         if (err)
             deferred.reject(err);
